@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
 import { promises as fs } from 'fs';
-import mime from 'mime-types';
 import path from 'path';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
+import { ObjectId } from 'mongodb';
 
 class FilesController {
   static async postUpload(req, res) {
@@ -48,16 +48,23 @@ class FilesController {
     }
 
     const newFile = {
-      userId,
+      userId: new ObjectId(userId),
       name,
       type,
       isPublic,
-      parentId,
+      parentId: parentId === 0 ? 0 : new ObjectId(parentId),
     };
 
     if (type === 'folder') {
       const result = await filesCollection.insertOne(newFile);
-      return res.status(201).json({ id: result.insertedId, ...newFile });
+      return res.status(201).json({
+        id: result.insertedId,
+        userId: newFile.userId,
+        name,
+        type,
+        isPublic,
+        parentId,
+      });
     }
 
     const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
@@ -73,7 +80,15 @@ class FilesController {
     newFile.localPath = localPath;
     const result = await filesCollection.insertOne(newFile);
 
-    return res.status(201).json({ id: result.insertedId, ...newFile });
+    return res.status(201).json({
+      id: result.insertedId,
+      userId: newFile.userId,
+      name,
+      type,
+      isPublic,
+      parentId,
+      localPath,
+    });
   }
 }
 
