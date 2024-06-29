@@ -1,7 +1,7 @@
-import { MongoClient } from 'mongodb';
-import dotenv from 'dotenv';
+// utils/db.js
 
-dotenv.config();
+import { MongoClient } from 'mongodb';
+import { promisify } from 'util';
 
 class DBClient {
   constructor() {
@@ -10,28 +10,26 @@ class DBClient {
     const database = process.env.DB_DATABASE || 'files_manager';
     const url = `mongodb://${host}:${port}`;
 
-    this.client = new MongoClient(url, { useUnifiedTopology: true });
+    this.client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
     this.client.connect((err) => {
       if (err) {
-        console.error(`MongoDB client not connected to the server: ${err.message}`);
+        console.error('MongoDB client not connected to the server:', err.message);
       } else {
-        this.db = this.client.db(database);
         console.log('MongoDB client connected to the server');
+        this.db = this.client.db(database);
       }
     });
   }
 
   isAlive() {
-    return this.client && this.client.isConnected && this.client.isConnected();
+    return this.client.isConnected();
   }
 
   async nbUsers() {
-    if (!this.isAlive()) return 0;
     return this.db.collection('users').countDocuments();
   }
 
   async nbFiles() {
-    if (!this.isAlive()) return 0;
     return this.db.collection('files').countDocuments();
   }
 }
