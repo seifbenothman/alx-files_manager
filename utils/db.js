@@ -13,7 +13,7 @@ class DBClient {
     this.client = new MongoClient(url, { useUnifiedTopology: true });
     this.client.connect((err) => {
       if (err) {
-        console.error(`MongoDB client not connected to the server: ${err}`);
+        console.error(`MongoDB client not connected to the server: ${err.message}`);
       } else {
         this.db = this.client.db(database);
         console.log('MongoDB client connected to the server');
@@ -22,21 +22,17 @@ class DBClient {
   }
 
   isAlive() {
-    return this.client && this.client.isConnected();
+    return this.client && this.client.isConnected && this.client.isConnected();
   }
 
   async nbUsers() {
-    if (this.db) {
-      return this.db.collection('users').countDocuments();
-    }
-    return 0;
+    if (!this.isAlive()) return 0;
+    return this.db.collection('users').countDocuments();
   }
 
   async nbFiles() {
-    if (this.db) {
-      return this.db.collection('files').countDocuments();
-    }
-    return 0;
+    if (!this.isAlive()) return 0;
+    return this.db.collection('files').countDocuments();
   }
 }
 
