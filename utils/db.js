@@ -11,29 +11,29 @@ class DBClient {
     const url = `mongodb://${host}:${port}`;
 
     this.client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
-    this.client.connect((err) => {
-      if (err) {
-        console.error('MongoDB client not connected to the server:', err.message);
-      } else {
-        console.log('MongoDB client connected to the server');
+    this.client.connect()
+      .then(() => {
         this.db = this.client.db(database);
-      }
-    });
+        console.log('MongoDB client connected to the server');
+      })
+      .catch((err) => {
+        console.error('MongoDB client not connected to the server:', err.message);
+      });
   }
 
   isAlive() {
-    return this.client && this.client.topology && this.client.topology.isConnected();
+    return this.client && this.client.isConnected && this.client.isConnected();
   }
 
   async nbUsers() {
-    if (!this.isAlive()) {
+    if (!this.db) {
       return 0;
     }
     return this.db.collection('users').countDocuments();
   }
 
   async nbFiles() {
-    if (!this.isAlive()) {
+    if (!this.db) {
       return 0;
     }
     return this.db.collection('files').countDocuments();
