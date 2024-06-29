@@ -1,7 +1,7 @@
-// utils/db.js
-
 import { MongoClient } from 'mongodb';
-import { promisify } from 'util';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 class DBClient {
   constructor() {
@@ -22,14 +22,20 @@ class DBClient {
   }
 
   isAlive() {
-    return this.client.isConnected();
+    return this.client && this.client.topology && this.client.topology.isConnected();
   }
 
   async nbUsers() {
+    if (!this.isAlive()) {
+      return 0;
+    }
     return this.db.collection('users').countDocuments();
   }
 
   async nbFiles() {
+    if (!this.isAlive()) {
+      return 0;
+    }
     return this.db.collection('files').countDocuments();
   }
 }
