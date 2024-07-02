@@ -3,14 +3,7 @@ import { createClient } from 'redis';
 class RedisClient {
   constructor() {
     this.client = createClient();
-
-    this.client.on('error', (error) => {
-      console.error(`Redis client not connected to the server: ${error}`);
-    });
-
-    this.client.on('connect', () => {
-      console.log('Redis client connected to the server');
-    });
+    this.client.on('error', (err) => console.error('Redis Client Error', err));
   }
 
   isAlive() {
@@ -22,9 +15,9 @@ class RedisClient {
       this.client.get(key, (err, value) => {
         if (err) {
           reject(err);
-        } else {
-          resolve(value);
+          return;
         }
+        resolve(value);
       });
     });
   }
@@ -34,9 +27,9 @@ class RedisClient {
       this.client.set(key, value, 'EX', duration, (err) => {
         if (err) {
           reject(err);
-        } else {
-          resolve();
+          return;
         }
+        resolve(true);
       });
     });
   }
@@ -46,9 +39,9 @@ class RedisClient {
       this.client.del(key, (err) => {
         if (err) {
           reject(err);
-        } else {
-          resolve();
+          return;
         }
+        resolve(true);
       });
     });
   }

@@ -1,7 +1,4 @@
-// utils/db.js
-
 import { MongoClient } from 'mongodb';
-import { promisify } from 'util';
 
 class DBClient {
   constructor() {
@@ -13,12 +10,11 @@ class DBClient {
     this.client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
     this.client.connect((err) => {
       if (err) {
-        console.error('MongoDB client not connected to the server:', err.message);
-      } else {
-        console.log('MongoDB client connected to the server');
-        this.db = this.client.db(database);
+        console.error('MongoDB Client Error', err);
       }
     });
+
+    this.db = this.client.db(database);
   }
 
   isAlive() {
@@ -26,11 +22,15 @@ class DBClient {
   }
 
   async nbUsers() {
-    return this.db.collection('users').countDocuments();
+    const usersCollection = this.db.collection('users');
+    const count = await usersCollection.countDocuments();
+    return count;
   }
 
   async nbFiles() {
-    return this.db.collection('files').countDocuments();
+    const filesCollection = this.db.collection('files');
+    const count = await filesCollection.countDocuments();
+    return count;
   }
 }
 
